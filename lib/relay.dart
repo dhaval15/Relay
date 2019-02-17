@@ -20,10 +20,9 @@ class RelayBuilder<S extends Station<U>, U> extends StatefulWidget {
   
   Relay<U> get relay => station._relay;
   
-  const RelayBuilder(
-      {@required this.builder,
-        @required this.observers,
-        @required this.station});
+  const RelayBuilder({@required this.builder,
+    @required this.observers,
+    @required this.station});
   
   @override
   RelayState<S, U> createState() => RelayState();
@@ -80,22 +79,20 @@ class RelaySubscription {
   }
 }
 
-
-
 class Provider extends InheritedWidget {
   final Map<Type, Station> _objects = Map();
-
+  
   Provider({Widget child}) : super(child: child);
-
+  
   Station operator [](Type type) => _objects[type];
-
+  
   void register(Type type, Station value) => _objects[type] = value;
-
+  
   void unregister(Type type) => _objects[type] = null;
-
+  
   factory Provider.of(BuildContext context) =>
       context.ancestorWidgetOfExactType(Provider);
-
+  
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => false;
 }
@@ -106,21 +103,21 @@ abstract class ProviderWidget extends StatefulWidget {
 
 abstract class ProviderState<T extends ProviderWidget> extends State<T> {
   Station get station => widget.station;
-
+  
   @override
   void initState() {
     super.initState();
     register(context);
   }
-
+  
   void register(BuildContext context) {
     Provider.of(context).register(station.runtimeType, station);
   }
-
+  
   void unRegister(BuildContext context) {
     Provider.of(context).unregister(station.runtimeType);
   }
-
+  
   @override
   void dispose() {
     super.dispose();

@@ -1,6 +1,6 @@
 name: relay
-description: A new Flutter package project.
-version: 0.0.3
+description: Library which uses modified BLoC pattern to listen to multiple updates in single builder widget.
+version: 0.0.4
 author: Dhaval Patel <dhavalpatel32768@gmail.com>
 homepage: https://github.com/dhavalpatel007/Relay
 
