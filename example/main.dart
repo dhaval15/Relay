@@ -30,6 +30,7 @@ class ExampleStation extends Station<ExampleUpdate> {
   
   void updateName(String text) {
     name = text;
+    relay(ExampleUpdate.name);
   }
 }
 
