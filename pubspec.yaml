@@ -1,6 +1,6 @@
 name: relay
 description: Library which uses modified BLoC pattern to listen to multiple updates in single builder widget.
-version: 0.0.6
+version: 0.1.0
 author: Dhaval Patel <dhavalpatel32768@gmail.com>
 homepage: https://github.com/dhavalpatel007/Relay
 
