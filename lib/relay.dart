@@ -8,6 +8,10 @@ typedef AsyncRelayBuilder<S extends Station> = Widget Function(
 abstract class Station<U> {
   final _relay = Relay<U>();
 
+  void relayMultiple(List<U> updates) {
+    updates.forEach(relay);
+  }
+
   void relay(U update) {
     _relay.add(update);
   }
