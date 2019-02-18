@@ -6,5 +6,5 @@ Added Support for listening the updates via onUpdate method. It can be used for 
 ## [0.1.2] -  New Function 
 Added Support for relaying more than one updates at a time via relayMultiple() function.
 
-## [0.1.3] -  Major Bug Fixes;
+## [0.1.4] -  Major Bug Fixes;
 Bug of re-initialization of station object fixed.

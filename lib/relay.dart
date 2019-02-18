@@ -103,9 +103,7 @@ class Provider extends InheritedWidget {
 }
 
 abstract class ProviderWidget<S extends Station> extends StatefulWidget {
-  final S Function() builder;
-
-  const ProviderWidget({Key key, this.builder}) : super(key: key);
+  S createStation();
 }
 
 abstract class ProviderState<T extends ProviderWidget, S extends Station<U>, U>
@@ -118,7 +116,7 @@ abstract class ProviderState<T extends ProviderWidget, S extends Station<U>, U>
   @override
   void initState() {
     super.initState();
-    station = widget.builder();
+    station = widget.createStation();
     register(context);
     _subscription = station._relay.subscribe(onUpdate);
   }
