@@ -39,10 +39,9 @@ class ExampleStation extends Station<ExampleUpdate> {
 }
 
 class Example extends ProviderWidget<ExampleStation> {
-  ExampleState createState() => ExampleState();
+  Example() : super(builder: () => ExampleStation());
 
-  @override
-  ExampleStation get station => ExampleStation();
+  ExampleState createState() => ExampleState();
 }
 
 class ExampleState
