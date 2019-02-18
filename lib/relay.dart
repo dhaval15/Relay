@@ -102,14 +102,18 @@ abstract class ProviderWidget<S extends Station> extends StatefulWidget {
   S get station;
 }
 
-abstract class ProviderState<T extends ProviderWidget, S extends Station>
+abstract class ProviderState<T extends ProviderWidget, S extends Station<U>, U>
     extends State<T> {
   S get station => widget.station;
+  RelaySubscription _subscription;
+
+  void onUpdate(U update) {}
 
   @override
   void initState() {
     super.initState();
     register(context);
+    station._relay.subscribe(onUpdate);
   }
 
   void register(BuildContext context) {
@@ -124,5 +128,6 @@ abstract class ProviderState<T extends ProviderWidget, S extends Station>
   void dispose() {
     super.dispose();
     unRegister(context);
+    _subscription.cancel();
   }
 }

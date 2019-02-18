@@ -1,3 +1,6 @@
-## [0.0.1] - TODO: Add release date.
+## [0.0.1] -  Initial Release.
 
-* TODO: Describe initial release.
+## [0.1.0] -  Stable Release 
+Added Support for listening the updates via onUpdate method. It can be used for pushing routes or showing snackbar. See More in Example
+
+
