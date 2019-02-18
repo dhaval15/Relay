@@ -113,7 +113,7 @@ abstract class ProviderState<T extends ProviderWidget, S extends Station<U>, U>
   void initState() {
     super.initState();
     register(context);
-    station._relay.subscribe(onUpdate);
+    _subscription = station._relay.subscribe(onUpdate);
   }
 
   void register(BuildContext context) {
