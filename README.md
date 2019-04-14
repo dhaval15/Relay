@@ -2,6 +2,12 @@
 
 ###### Library which uses modified BLoC pattern to listen to multiple updates in single builder widget.
 
+#### Import
+
+```dart
+import 'package:relay/relay.dart';
+```
+
 ### Example
 
 Through simple implementation you can relay update from station
@@ -16,15 +22,21 @@ Like in below example,
 * second relay builder widget observes on both counter and name.
 
 ```dart
-enum ExampleUpdate { counter, name }
+enum ExampleUpdate { counter, name, message }
 
-class ExampleStation extends Station<ExampleUpdate> {
+class ExampleStore extends Store<ExampleUpdate> {
   int counter = 0;
   String name = '';
+  String snackBarMessage;
 
   void increment() {
-    counter++;
-    relay(ExampleUpdate.counter);
+    if (counter < 10) {
+      counter++;
+      relay(ExampleUpdate.counter);
+    } else {
+      snackBarMessage = 'Maximum Limit Reached';
+      relay(ExampleUpdate.message);
+    }
   }
 
   void updateName(String text) {
@@ -34,16 +46,16 @@ class ExampleStation extends Station<ExampleUpdate> {
 }
 
 class Example extends StatefulWidget {
+  @override
   ExampleState createState() => ExampleState();
 }
 
-class ExampleState extends State<Example> {
-  ExampleStation station;
-
-  @override
-  void initState() {
-    super.initState();
-    station = ExampleStation();
+class ExampleState extends State<Example>
+    with ProviderMixin<ExampleStore, ExampleUpdate> {
+  void onUpdate(ExampleUpdate update) {
+    if (update == ExampleUpdate.message)
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(getStore(context).snackBarMessage)));
   }
 
   @override
@@ -53,19 +65,19 @@ class ExampleState extends State<Example> {
         child: Center(
           child: Column(
             children: <Widget>[
-              RelayBuilder<ExampleStation, ExampleUpdate>(
-                station: station,
+              RelayBuilder<ExampleStore, ExampleUpdate>(
+                store: getStore(context),
                 observers: [ExampleUpdate.counter],
                 builder: (context, station) => Text('${station.counter}'),
               ),
-              RelayBuilder<ExampleStation, ExampleUpdate>(
-                station: station,
+              RelayBuilder<ExampleStore, ExampleUpdate>(
+                store: getStore(context),
                 observers: [ExampleUpdate.name, ExampleUpdate.counter],
                 builder: (context, station) =>
                     Text('${station.name} : ${station.counter}'),
               ),
               TextField(
-                onChanged: station.updateName,
+                onChanged: getStore(context).updateName,
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -75,7 +87,7 @@ class ExampleState extends State<Example> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: station.increment,
+        onPressed: getStore(context).increment,
         child: Icon(Icons.add),
       ),
     );
@@ -90,11 +102,22 @@ class ExampleState extends State<Example> {
     Wrap Material App with Provider
     
 ```dart
-    Provider(
-      child : MaterialApp(
-          ...
-      ) , 
-    );
+    class MyApp extends StatelessWidget {
+      @override
+      Widget build(BuildContext context) {
+        return Provider(
+          manager: StoreManager(
+            stores: {
+              ExampleStore: () => ExampleStore(),
+            },
+          ),
+          child: MaterialApp(
+            title: 'Relay Example',
+            home: Example(),
+          ),
+        );
+      }
+    }
 ```
 
 * Widget

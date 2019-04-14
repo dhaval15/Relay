@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../lib/relay.dart';
+import 'package:relay/relay.dart';
 
 void main() => runApp(MyApp());
 
@@ -7,6 +7,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider(
+      manager: StoreManager(
+        stores: {
+          ExampleStore: () => ExampleStore(),
+        },
+      ),
       child: MaterialApp(
         title: 'Relay Example',
         home: Example(),
@@ -17,7 +22,7 @@ class MyApp extends StatelessWidget {
 
 enum ExampleUpdate { counter, name, message }
 
-class ExampleStation extends Station<ExampleUpdate> {
+class ExampleStore extends Store<ExampleUpdate> {
   int counter = 0;
   String name = '';
   String snackBarMessage;
@@ -38,20 +43,17 @@ class ExampleStation extends Station<ExampleUpdate> {
   }
 }
 
-class Example extends ProviderWidget<ExampleStation> {
-  Example() : super(builder: () => ExampleStation());
-
+class Example extends StatefulWidget {
+  @override
   ExampleState createState() => ExampleState();
 }
 
-class ExampleState
-    extends ProviderState<Example, ExampleStation, ExampleUpdate> {
-  @override
+class ExampleState extends State<Example>
+    with ProviderMixin<ExampleStore, ExampleUpdate> {
   void onUpdate(ExampleUpdate update) {
-    super.onUpdate(update);
     if (update == ExampleUpdate.message)
-      Scaffold.of(context)
-          .showSnackBar(SnackBar(content: Text(station.snackBarMessage)));
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(getStore(context).snackBarMessage)));
   }
 
   @override
@@ -61,19 +63,19 @@ class ExampleState
         child: Center(
           child: Column(
             children: <Widget>[
-              RelayBuilder<ExampleStation, ExampleUpdate>(
-                station: station,
+              RelayBuilder<ExampleStore, ExampleUpdate>(
+                store: getStore(context),
                 observers: [ExampleUpdate.counter],
                 builder: (context, station) => Text('${station.counter}'),
               ),
-              RelayBuilder<ExampleStation, ExampleUpdate>(
-                station: station,
+              RelayBuilder<ExampleStore, ExampleUpdate>(
+                store: getStore(context),
                 observers: [ExampleUpdate.name, ExampleUpdate.counter],
                 builder: (context, station) =>
                     Text('${station.name} : ${station.counter}'),
               ),
               TextField(
-                onChanged: station.updateName,
+                onChanged: getStore(context).updateName,
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -83,7 +85,7 @@ class ExampleState
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: station.increment,
+        onPressed: getStore(context).increment,
         child: Icon(Icons.add),
       ),
     );

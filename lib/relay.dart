@@ -2,10 +2,10 @@ library relay;
 
 import 'package:flutter/material.dart';
 
-typedef AsyncRelayBuilder<S extends Station> = Widget Function(
+typedef AsyncRelayBuilder<S extends Store> = Widget Function(
     BuildContext context, S);
 
-abstract class Station<U> {
+abstract class Store<U> {
   final _relay = Relay<U>();
 
   void relayMultiple(List<U> updates) {
@@ -17,23 +17,39 @@ abstract class Station<U> {
   }
 }
 
-class RelayBuilder<S extends Station<U>, U> extends StatefulWidget {
+typedef LazyStoreInitializer = Store Function();
+
+class StoreManager {
+  Map<Type, Store> _stores = Map();
+  final Map<Type, LazyStoreInitializer> stores;
+
+  Store get(Type type) {
+    Store store = _stores[type];
+    if (store == null) {
+      store = stores[type]();
+      _stores[type] = store;
+    }
+    return store;
+  }
+
+  StoreManager({@required this.stores});
+}
+
+class RelayBuilder<S extends Store<U>, U> extends StatefulWidget {
   final AsyncRelayBuilder<S> builder;
   final List<U> observers;
-  final S station;
+  final S store;
 
-  Relay<U> get relay => station._relay;
+  Relay<U> get relay => store._relay;
 
   const RelayBuilder(
-      {@required this.builder,
-      @required this.observers,
-      @required this.station});
+      {@required this.builder, @required this.observers, @required this.store});
 
   @override
   RelayState<S, U> createState() => RelayState();
 }
 
-class RelayState<S extends Station<U>, U> extends State<RelayBuilder<S, U>> {
+class RelayState<S extends Store<U>, U> extends State<RelayBuilder<S, U>> {
   RelaySubscription _subscription;
 
   @override
@@ -44,7 +60,7 @@ class RelayState<S extends Station<U>, U> extends State<RelayBuilder<S, U>> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, widget.station);
+    return widget.builder(context, widget.store);
   }
 
   @override
@@ -85,15 +101,11 @@ class RelaySubscription {
 }
 
 class Provider extends InheritedWidget {
-  final Map<Type, Station> _objects = Map();
+  final StoreManager manager;
 
-  Provider({Widget child}) : super(child: child);
+  Provider({@required this.manager, Widget child}) : super(child: child);
 
-  Station operator [](Type type) => _objects[type];
-
-  void register(Type type, Station value) => _objects[type] = value;
-
-  void unregister(Type type) => _objects[type] = null;
+  Store get(Type type) => manager.get(type);
 
   factory Provider.of(BuildContext context) =>
       context.ancestorWidgetOfExactType(Provider);
@@ -102,37 +114,18 @@ class Provider extends InheritedWidget {
   bool updateShouldNotify(InheritedWidget oldWidget) => false;
 }
 
-abstract class ProviderWidget<S extends Station> extends StatefulWidget {
-  S createStation();
+class _StoreWrapper<S extends Store> {
+  S store;
 }
 
-abstract class ProviderState<T extends ProviderWidget, S extends Station<U>, U>
-    extends State<T> {
-  S station;
-  RelaySubscription _subscription;
+mixin ProviderMixin<S extends Store<U>, U> {
+  final _wrapper = _StoreWrapper<S>();
 
-  void onUpdate(U update) {}
-
-  @override
-  void initState() {
-    super.initState();
-    station = widget.createStation();
-    register(context);
-    _subscription = station._relay.subscribe(onUpdate);
+  S getStore(BuildContext context) {
+    if (_wrapper.store == null) _wrapper.store = Provider.of(context).get(S);
+    return _wrapper.store;
   }
 
-  void register(BuildContext context) {
-    Provider.of(context).register(station.runtimeType, station);
-  }
-
-  void unRegister(BuildContext context) {
-    Provider.of(context).unregister(station.runtimeType);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    unRegister(context);
-    _subscription.cancel();
-  }
+  RelaySubscription subscribe(BuildContext context, Function(U) subscriber) =>
+      getStore(context)._relay.subscribe(subscriber);
 }
