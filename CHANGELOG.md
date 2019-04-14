@@ -9,7 +9,7 @@ Added Support for relaying more than one updates at a time via relayMultiple() f
 ## [0.1.4] -  Major Bug Fixes:
 Bug of re-initialization of station object fixed.
 
-## [0.2.0] - Major Api Breaking Changes :
+## [0.2.1] - Major Api Breaking Changes :
 - Renamed Station to Store.
 - Provider Widgets are decoupled using ProviderMixin.
 - Store Initialization made global and uplifted to Provider Widget.
