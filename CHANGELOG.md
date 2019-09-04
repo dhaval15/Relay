@@ -13,3 +13,8 @@ Bug of re-initialization of station object fixed.
 - Renamed Station to Store.
 - Provider Widgets are decoupled using ProviderMixin.
 - Store Initialization made global and uplifted to Provider Widget.
+
+## [0.3.0] - Major Api Breaking Changes :
+- Added New Class : Action and Update
+- Used Stream and yield to release update.
+- Changes are within updates. No need of store in build methods.

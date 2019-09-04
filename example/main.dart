@@ -22,8 +22,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum ExampleUpdate { counter, name, message }
-
 class IncrementAction extends Action{
   IncrementAction() : super(null);
 }
@@ -46,8 +44,6 @@ class MessageUpdate extends Update{
 
 class ExampleStore extends Store {
   int counter = 0;
-  String name = '';
-  String snackBarMessage;
 
   @override
   Stream<Update> onAction(Action action) async*{
@@ -56,7 +52,7 @@ class ExampleStore extends Store {
         counter++;
         yield CounterUpdate();
       } else {
-        snackBarMessage = 'Maximum Limit Reached';
+        final snackBarMessage = 'Maximum Limit Reached';
         yield MessageUpdate(snackBarMessage);
       }
     }

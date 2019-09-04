@@ -22,26 +22,43 @@ Like in below example,
 * second relay builder widget observes on both counter and name.
 
 ```dart
-enum ExampleUpdate { counter, name, message }
+class IncrementAction extends Action{
+  IncrementAction() : super(null);
+}
 
-class ExampleStore extends Store<ExampleUpdate> {
+class NameAction extends Action{
+  NameAction(String name) : super(name);
+}
+
+class CounterUpdate extends Update{
+  CounterUpdate() : super(null);
+}
+
+class NameUpdate extends Update {
+  NameUpdate(String name) : super(name);
+}
+
+class MessageUpdate extends Update{
+  MessageUpdate(String message) : super(message);
+}
+
+class ExampleStore extends Store {
   int counter = 0;
-  String name = '';
-  String snackBarMessage;
 
-  void increment() {
-    if (counter < 10) {
-      counter++;
-      relay(ExampleUpdate.counter);
-    } else {
-      snackBarMessage = 'Maximum Limit Reached';
-      relay(ExampleUpdate.message);
+  @override
+  Stream<Update> onAction(Action action) async*{
+    if(action is IncrementAction) {
+      if (counter < 10) {
+        counter++;
+        yield CounterUpdate();
+      } else {
+        final snackBarMessage = 'Maximum Limit Reached';
+        yield MessageUpdate(snackBarMessage);
+      }
     }
-  }
-
-  void updateName(String text) {
-    name = text;
-    relay(ExampleUpdate.name);
+    else if(action is NameAction){
+      yield NameUpdate(action.params);
+    }
   }
 }
 
@@ -51,33 +68,34 @@ class Example extends StatefulWidget {
 }
 
 class ExampleState extends State<Example>
-    with ProviderMixin<ExampleStore, ExampleUpdate> {
-  void onUpdate(ExampleUpdate update) {
-    if (update == ExampleUpdate.message)
+    with ProviderMixin<ExampleStore> {
+  void onUpdate(Update update) {
+    if (update is MessageUpdate)
       Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(getStore(context).snackBarMessage)));
+          SnackBar(content: Text(update.data)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final store = getStore(context);
     return Scaffold(
       body: Container(
         child: Center(
           child: Column(
             children: <Widget>[
-              RelayBuilder<ExampleStore, ExampleUpdate>(
+              RelayBuilder<ExampleStore>(
                 store: getStore(context),
-                observers: [ExampleUpdate.counter],
-                builder: (context, store) => Text('${store.counter}'),
+                observers: [CounterUpdate],
+                builder: (context, data) => Text('${data[CounterUpdate]}'),
               ),
-              RelayBuilder<ExampleStore, ExampleUpdate>(
+              RelayBuilder<ExampleStore>(
                 store: getStore(context),
-                observers: [ExampleUpdate.name, ExampleUpdate.counter],
-                builder: (context, store) =>
-                    Text('${store.name} : ${store.counter}'),
+                observers: [NameUpdate,CounterUpdate],
+                builder: (context, data) =>
+                    Text('${data[NameUpdate]} : ${data[CounterUpdate]}'),
               ),
               TextField(
-                onChanged: getStore(context).updateName,
+                onChanged: (name) => store.dispatchAction(NameAction(name)),
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -87,37 +105,12 @@ class ExampleState extends State<Example>
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: getStore(context).increment,
+        onPressed: () => store.dispatchAction(IncrementAction()),
         child: Icon(Icons.add),
       ),
     );
   }
 }
-```
-
-### Example With Use of Provider.
-
-* main.dart
-    
-    Wrap Material App with Provider
-    
-```dart
-    class MyApp extends StatelessWidget {
-      @override
-      Widget build(BuildContext context) {
-        return Provider(
-          manager: StoreManager(
-            stores: {
-              ExampleStore: () => ExampleStore(),
-            },
-          ),
-          child: MaterialApp(
-            title: 'Relay Example',
-            home: Example(),
-          ),
-        );
-      }
-    }
 ```
 
 * Widget
