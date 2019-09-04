@@ -18,3 +18,6 @@ Bug of re-initialization of station object fixed.
 - Added New Class : Action and Update
 - Used Stream and yield to release update.
 - Changes are within updates. No need of store in build methods.
+
+## [0.3.1] - Bug Fixes :
+- Fixed Counter Bug in Example.

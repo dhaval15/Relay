@@ -31,7 +31,7 @@ class NameAction extends Action{
 }
 
 class CounterUpdate extends Update{
-  CounterUpdate() : super(null);
+  CounterUpdate(int counter) : super(counter);
 }
 
 class NameUpdate extends Update {
@@ -50,7 +50,7 @@ class ExampleStore extends Store {
     if(action is IncrementAction) {
       if (counter < 10) {
         counter++;
-        yield CounterUpdate();
+        yield CounterUpdate(counter);
       } else {
         final snackBarMessage = 'Maximum Limit Reached';
         yield MessageUpdate(snackBarMessage);
