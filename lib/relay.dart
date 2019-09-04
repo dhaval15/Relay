@@ -2,19 +2,29 @@ library relay;
 
 import 'package:flutter/material.dart';
 
-typedef AsyncRelayBuilder<S extends Store> = Widget Function(
-    BuildContext context, S);
+typedef AsyncRelayBuilder = Widget Function(
+    BuildContext context, Map<Type, dynamic>);
 
-abstract class Store<U> {
-  final _relay = Relay<U>();
+class Update {
+  final data;
 
-  void relayMultiple(List<U> updates) {
-    updates.forEach(relay);
+  Update(this.data);
+}
+
+class Action {
+  final params;
+
+  Action(this.params);
+}
+
+abstract class Store {
+  final _relay = Relay<Update>();
+
+  void dispatchAction(Action action) {
+    onAction(action).listen(_relay.add);
   }
 
-  void relay(U update) {
-    _relay.add(update);
-  }
+  Stream<Update> onAction(Action action);
 }
 
 typedef LazyStoreInitializer = Store Function();
@@ -35,21 +45,22 @@ class StoreManager {
   StoreManager({@required this.stores});
 }
 
-class RelayBuilder<S extends Store<U>, U> extends StatefulWidget {
-  final AsyncRelayBuilder<S> builder;
-  final List<U> observers;
+class RelayBuilder<S extends Store> extends StatefulWidget {
+  final AsyncRelayBuilder builder;
+  final List<Type> observers;
+  final Map<Type, dynamic> _data = {};
   final S store;
 
-  Relay<U> get relay => store._relay;
+  Relay<Update> get relay => store._relay;
 
-  const RelayBuilder(
+  RelayBuilder(
       {@required this.builder, @required this.observers, @required this.store});
 
   @override
-  RelayState<S, U> createState() => RelayState();
+  RelayState<S> createState() => RelayState();
 }
 
-class RelayState<S extends Store<U>, U> extends State<RelayBuilder<S, U>> {
+class RelayState<S extends Store> extends State<RelayBuilder<S>> {
   RelaySubscription _subscription;
 
   @override
@@ -60,7 +71,7 @@ class RelayState<S extends Store<U>, U> extends State<RelayBuilder<S, U>> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, widget.store);
+    return widget.builder(context, widget._data);
   }
 
   @override
@@ -69,9 +80,14 @@ class RelayState<S extends Store<U>, U> extends State<RelayBuilder<S, U>> {
     _subscription.cancel();
   }
 
-  void _onUpdate(U update) {
-    print(update.toString());
-    if (widget.observers.contains(update)) setState(() {});
+  void _onUpdate(Update update) {
+    //print(update.toString());
+    final type = update.runtimeType;
+    final data = update.data;
+    if (widget.observers.contains(type))
+      setState(() {
+        widget._data[type] = data;
+      });
   }
 }
 
@@ -118,7 +134,7 @@ class _StoreWrapper<S extends Store> {
   S store;
 }
 
-mixin ProviderMixin<S extends Store<U>, U> {
+mixin ProviderMixin<S extends Store> {
   final _wrapper = _StoreWrapper<S>();
 
   S getStore(BuildContext context) {
@@ -126,6 +142,7 @@ mixin ProviderMixin<S extends Store<U>, U> {
     return _wrapper.store;
   }
 
-  RelaySubscription subscribe(BuildContext context, Function(U) subscriber) =>
+  RelaySubscription subscribe(
+          BuildContext context, Function(Update) subscriber) =>
       getStore(context)._relay.subscribe(subscriber);
 }
