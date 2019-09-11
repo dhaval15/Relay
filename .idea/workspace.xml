@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="204eaf00-313b-413c-a322-69f46fa23946" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/relay.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/relay.dart" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,12 +25,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="65" />
-    <option name="y" value="92" />
-    <option name="width" value="697" />
-    <option name="height" value="371" />
   </component>
   <component name="ProjectId" id="1QNc5VPWLddKwsFwxfCITWgH0hA" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -88,7 +81,11 @@
       <workItem from="1550507747124" duration="674000" />
       <workItem from="1555173426761" duration="1491000" />
       <workItem from="1555233559139" duration="6602000" />
-      <workItem from="1567614315015" duration="3763000" />
+      <workItem from="1567614315015" duration="3987000" />
+      <workItem from="1567619157100" duration="253000" />
+      <workItem from="1568000497549" duration="202000" />
+      <workItem from="1568169864359" duration="607000" />
+      <workItem from="1568186962626" duration="1442000" />
     </task>
     <servers />
   </component>
@@ -100,7 +97,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>

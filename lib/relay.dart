@@ -49,12 +49,9 @@ class RelayBuilder<S extends Store> extends StatefulWidget {
   final AsyncRelayBuilder builder;
   final List<Type> observers;
   final Map<Type, dynamic> _data = {};
-  final S store;
+  S store;
 
-  Relay<Update> get relay => store._relay;
-
-  RelayBuilder(
-      {@required this.builder, @required this.observers, @required this.store});
+  RelayBuilder({@required this.builder, @required this.observers, this.store});
 
   @override
   RelayState<S> createState() => RelayState();
@@ -62,15 +59,19 @@ class RelayBuilder<S extends Store> extends StatefulWidget {
 
 class RelayState<S extends Store> extends State<RelayBuilder<S>> {
   RelaySubscription _subscription;
+  S store;
+
+  Relay<Update> get relay => store._relay;
 
   @override
   void initState() {
     super.initState();
-    _subscription = widget.relay.subscribe(_onUpdate);
+    _subscription = relay.subscribe(_onUpdate);
   }
 
   @override
   Widget build(BuildContext context) {
+    store = widget.store ?? Provider.of(context).get(S);
     return widget.builder(context, widget._data);
   }
 
@@ -88,6 +89,18 @@ class RelayState<S extends Store> extends State<RelayBuilder<S>> {
       setState(() {
         widget._data[type] = data;
       });
+  }
+}
+
+class Dispatcher<S extends Store> extends StatelessWidget {
+  final Function(BuildContext, S store) builder;
+
+  const Dispatcher({Key key, this.builder}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    S store = Provider.of(context).get(S);
+    return builder(context, store);
   }
 }
 
