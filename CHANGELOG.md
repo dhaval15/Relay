@@ -21,3 +21,7 @@ Bug of re-initialization of station object fixed.
 
 ## [0.3.1] - Bug Fixes :
 - Fixed Counter Bug in Example.
+
+## [0.3.2] - New Features :
+- Removed Parameter Store From Relay Builder( You can explicitly specify it also).
+- Dispatcher Widget can be used to get store object for dispatching actions.
