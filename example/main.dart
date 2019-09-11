@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:relay/relay.dart';
-import 'package:relay/relay.dart' as prefix0;
 
 void main() => runApp(MyApp());
 
