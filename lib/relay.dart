@@ -1,6 +1,7 @@
 library relay;
 
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 typedef AsyncRelayBuilder = Widget Function(
     BuildContext context, Map<Type, dynamic>);
@@ -49,7 +50,7 @@ class RelayBuilder<S extends Store> extends StatefulWidget {
   final AsyncRelayBuilder builder;
   final List<Type> observers;
   final Map<Type, dynamic> _data = {};
-  S store;
+  final S store;
 
   RelayBuilder({@required this.builder, @required this.observers, this.store});
 
