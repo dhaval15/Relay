@@ -66,12 +66,12 @@ class RelayState<S extends Store> extends State<RelayBuilder<S>> {
   @override
   void initState() {
     super.initState();
+    store = widget.store ?? Provider.of(context).get(S);
     _subscription = relay.subscribe(_onUpdate);
   }
 
   @override
   Widget build(BuildContext context) {
-    store = widget.store ?? Provider.of(context).get(S);
     return widget.builder(context, widget._data);
   }
 
