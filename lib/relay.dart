@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 typedef AsyncRelayBuilder = Widget Function(
+    BuildContext context, dynamic data);
+
+typedef AsyncMultiRelayBuilder = Widget Function(
     BuildContext context, Map<Type, dynamic>);
 
 class Update {
@@ -48,17 +51,69 @@ class StoreManager {
 
 class RelayBuilder<S extends Store> extends StatefulWidget {
   final AsyncRelayBuilder builder;
-  final List<Type> observers;
-  final Map<Type, dynamic> _data = {};
+  final Type observer;
+  final dynamic initialData;
   final S store;
 
-  RelayBuilder({@required this.builder, @required this.observers, this.store});
+  RelayBuilder(
+      {@required this.builder,
+      @required this.observer,
+      this.store,
+      this.initialData});
 
   @override
   RelayState<S> createState() => RelayState();
 }
 
 class RelayState<S extends Store> extends State<RelayBuilder<S>> {
+  RelaySubscription _subscription;
+  S store;
+  dynamic data;
+
+  Relay<Update> get relay => store._relay;
+
+  @override
+  void initState() {
+    super.initState();
+    data = widget.initialData;
+    store = widget.store ?? Provider.of(context).get(S);
+    _subscription = relay.subscribe(_onUpdate);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, data);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.cancel();
+  }
+
+  void _onUpdate(Update update) {
+    final type = update.runtimeType;
+    if (widget.observer == type)
+      setState(() {
+        data = update.data;
+      });
+  }
+}
+
+class MultiRelayBuilder<S extends Store> extends StatefulWidget {
+  final AsyncMultiRelayBuilder builder;
+  final List<Type> observers;
+  final Map<Type, dynamic> _data = {};
+  final S store;
+
+  MultiRelayBuilder(
+      {@required this.builder, @required this.observers, this.store});
+
+  @override
+  MultiRelayState<S> createState() => MultiRelayState();
+}
+
+class MultiRelayState<S extends Store> extends State<MultiRelayBuilder<S>> {
   RelaySubscription _subscription;
   S store;
 

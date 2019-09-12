@@ -1,3 +1,7 @@
+## [0.3.6] - Major Api Breaking Changes :
+- Separated Two Classes : Single Update -> RelayBuilder,
+                          Multiple Update -> MultiRelayBuilder  
+
 ## [0.3.5] - Bug Fixes :
 - Removed Immutable Warning.
 

@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:relay/relay.dart';
@@ -80,15 +80,15 @@ class ExampleState extends State<Example> with ProviderMixin<ExampleStore> {
           child: Column(
             children: <Widget>[
               RelayBuilder<ExampleStore>(
-                observers: [CounterUpdate],
-                builder: (context, data) => Text('${data[CounterUpdate]}'),
+                observer: CounterUpdate,
+                builder: (context, data) => Text(data),
               ),
-              RelayBuilder<ExampleStore>(
+              MultiRelayBuilder<ExampleStore>(
                 observers: [NameUpdate, CounterUpdate],
                 builder: (context, data) =>
                     Text('${data[NameUpdate]} : ${data[CounterUpdate]}'),
               ),
-              Dispatcher(
+              Dispatcher<ExampleStore>(
                 builder: (context, store) => TextField(
                   onChanged: (name) => store.dispatchAction(NameAction(name)),
                   decoration: InputDecoration(
@@ -100,7 +100,7 @@ class ExampleState extends State<Example> with ProviderMixin<ExampleStore> {
           ),
         ),
       ),
-      floatingActionButton: Dispatcher(
+      floatingActionButton: Dispatcher<ExampleStore>(
         builder: (context, store) => FloatingActionButton(
           onPressed: () => store.dispatchAction(IncrementAction()),
           child: Icon(Icons.add),

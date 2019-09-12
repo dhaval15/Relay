@@ -22,6 +22,13 @@ Like in below example,
 * second relay builder widget observes on both counter and name.
 
 ```dart
+import 'dart:async';
+
+import 'package:flutter/material.dart' hide Action;
+import 'package:relay/relay.dart';
+
+void main() => runApp(MyApp());
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -96,17 +103,16 @@ class ExampleState extends State<Example> with ProviderMixin<ExampleStore> {
         child: Center(
           child: Column(
             children: <Widget>[
-              RelayBuilder<ExampleStore>(
-                // store : Provider.of(context).get(ExampleStore) // You Can Specify Explicitly Also.
-                observers: [CounterUpdate],
-                builder: (context, data) => Text('${data[CounterUpdate]}'),
+              RelayBuilder<ExampleStore>( // Only Listen To Single Update.
+                observer: CounterUpdate,
+                builder: (context, data) => Text(data),
               ),
-              RelayBuilder<ExampleStore>(
+              MultiRelayBuilder<ExampleStore>( // Listen To Multiple Updates, data will be Map<Type,dynamic>.
                 observers: [NameUpdate, CounterUpdate],
                 builder: (context, data) =>
                     Text('${data[NameUpdate]} : ${data[CounterUpdate]}'),
               ),
-              Dispatcher(
+              Dispatcher<ExampleStore>( // Getting Store For Dispatching The Actions.
                 builder: (context, store) => TextField(
                   onChanged: (name) => store.dispatchAction(NameAction(name)),
                   decoration: InputDecoration(
@@ -118,7 +124,7 @@ class ExampleState extends State<Example> with ProviderMixin<ExampleStore> {
           ),
         ),
       ),
-      floatingActionButton: Dispatcher(
+      floatingActionButton: Dispatcher<ExampleStore>(
         builder: (context, store) => FloatingActionButton(
           onPressed: () => store.dispatchAction(IncrementAction()),
           child: Icon(Icons.add),
