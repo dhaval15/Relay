@@ -1,3 +1,6 @@
+## [0.3.7] - New Features:
+- Added Initial Updates on Widget Requests.  
+
 ## [0.3.6] - Major Api Breaking Changes :
 - Separated Two Classes : Single Update -> RelayBuilder,
                           Multiple Update -> MultiRelayBuilder  

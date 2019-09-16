@@ -3,8 +3,7 @@ library relay;
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-typedef AsyncRelayBuilder = Widget Function(
-    BuildContext context, dynamic data);
+typedef AsyncRelayBuilder = Widget Function(BuildContext context, dynamic data);
 
 typedef AsyncMultiRelayBuilder = Widget Function(
     BuildContext context, Map<Type, dynamic>);
@@ -23,6 +22,12 @@ class Action {
 
 abstract class Store {
   final _relay = Relay<Update>();
+
+  Stream<Update> onRequest(Type type);
+
+  void request(Type type) {
+    onRequest(type).listen(_relay.add);
+  }
 
   void dispatchAction(Action action) {
     onAction(action).listen(_relay.add);
@@ -54,10 +59,12 @@ class RelayBuilder<S extends Store> extends StatefulWidget {
   final Type observer;
   final dynamic initialData;
   final S store;
+  final bool request;
 
   RelayBuilder(
       {@required this.builder,
       @required this.observer,
+      this.request = false,
       this.store,
       this.initialData});
 
@@ -67,22 +74,23 @@ class RelayBuilder<S extends Store> extends StatefulWidget {
 
 class RelayState<S extends Store> extends State<RelayBuilder<S>> {
   RelaySubscription _subscription;
-  S store;
-  dynamic data;
+  S _store;
+  dynamic _data;
 
-  Relay<Update> get relay => store._relay;
+  Relay<Update> get relay => _store._relay;
 
   @override
   void initState() {
     super.initState();
-    data = widget.initialData;
-    store = widget.store ?? Provider.of(context).get(S);
+    _data = widget.initialData;
+    _store = widget.store ?? Provider.of(context).get(S);
     _subscription = relay.subscribe(_onUpdate);
+    if (widget.request) _store.request(widget.observer);
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, data);
+    return widget.builder(context, _data);
   }
 
   @override
@@ -95,7 +103,7 @@ class RelayState<S extends Store> extends State<RelayBuilder<S>> {
     final type = update.runtimeType;
     if (widget.observer == type)
       setState(() {
-        data = update.data;
+        _data = update.data;
       });
   }
 }
@@ -103,11 +111,16 @@ class RelayState<S extends Store> extends State<RelayBuilder<S>> {
 class MultiRelayBuilder<S extends Store> extends StatefulWidget {
   final AsyncMultiRelayBuilder builder;
   final List<Type> observers;
-  final Map<Type, dynamic> _data = {};
+  final Map<Type, dynamic> initialData;
   final S store;
+  final bool request;
 
   MultiRelayBuilder(
-      {@required this.builder, @required this.observers, this.store});
+      {@required this.builder,
+      @required this.observers,
+      this.initialData,
+      this.store,
+      this.request = false});
 
   @override
   MultiRelayState<S> createState() => MultiRelayState();
@@ -115,20 +128,23 @@ class MultiRelayBuilder<S extends Store> extends StatefulWidget {
 
 class MultiRelayState<S extends Store> extends State<MultiRelayBuilder<S>> {
   RelaySubscription _subscription;
-  S store;
+  S _store;
+  Map<Type, dynamic> _data;
 
-  Relay<Update> get relay => store._relay;
+  Relay<Update> get relay => _store._relay;
 
   @override
   void initState() {
     super.initState();
-    store = widget.store ?? Provider.of(context).get(S);
+    _data = widget.initialData ?? {};
+    _store = widget.store ?? Provider.of(context).get(S);
     _subscription = relay.subscribe(_onUpdate);
+    if (widget.request) widget.observers.forEach((o) => _store.request(o));
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, widget._data);
+    return widget.builder(context, _data);
   }
 
   @override
@@ -140,10 +156,9 @@ class MultiRelayState<S extends Store> extends State<MultiRelayBuilder<S>> {
   void _onUpdate(Update update) {
     //print(update.toString());
     final type = update.runtimeType;
-    final data = update.data;
     if (widget.observers.contains(type))
       setState(() {
-        widget._data[type] = data;
+        _data[type] = update.data;
       });
   }
 }
